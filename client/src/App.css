@@ -1,0 +1,110 @@
+/* --- Global Layout --- */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #242424;
+}
+
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: white;
+}
+
+.footer {
+  padding: 15px;
+  background-color: #1a1a1a;
+  color: #a0a0a0;
+  text-align: center; /* Explicitly center footer text */
+}
+
+/* --- Centering Container for Page Content --- */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* This is the key: forces children to center horizontally */
+  width: 100%;
+}
+
+/* --- Form Container --- */
+.form-container {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem; /* Space between input and button */
+}
+
+/* --- Component Styles --- */
+h1 {
+  font-size: 2.5em;
+  text-align: center; /* Force h1 to center its text */
+}
+
+.prasadam-input {
+  font-size: 1.2rem;
+  padding: 12px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+.create-button {
+  font-size: 1.2rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  background-color: #61dafb;
+  color: #282c34;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.link-display-box {
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 700px;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  color: #282c34;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.link-input-wrapper {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.link-input-wrapper input {
+  flex-grow: 1;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.link-input-wrapper button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  background-color: #61dafb;
+  color: #282c34;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* --- Mobile Responsiveness --- */
+@media (max-width: 600px) {
+  h1 { font-size: 1.8em; }
+  .link-input-wrapper { flex-direction: column; }
+}
