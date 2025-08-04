@@ -9,11 +9,8 @@ function CommitteePage() {
   const [committee, setCommittee] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bidAmount, setBidAmount] = useState('');
-
-  // (NEW) State to hold our single, persistent socket connection
   const [socket, setSocket] = useState(null);
 
-  // --- Effect 1: For fetching initial data (no change here) ---
   useEffect(() => {
     setIsLoading(true);
     fetch(`${apiUrl}/api/committees/slug/${committeeSlug}`)
@@ -29,33 +26,22 @@ function CommitteePage() {
       .finally(() => setIsLoading(false));
   }, [committeeSlug]);
 
-  // --- (UPDATED) Effect 2: Manages the single socket connection's lifecycle ---
   useEffect(() => {
-    // Do nothing if we haven't loaded the committee data yet
     if (!committee) return;
-
-    // Create the new socket connection
     const newSocket = io(apiUrl);
-    
-    // Save the socket instance to state so we can use it elsewhere
     setSocket(newSocket);
-
-    // Join the committee's room using its real ID
     newSocket.emit('join_committee', committee.id);
 
-    // Set up the listener for updates
     newSocket.on('bid_updated', (updatedCommittee) => {
+      // --- THIS IS THE CRITICAL DEBUGGING LINE ---
+      console.log('Data received from bid_updated event:', updatedCommittee);
+      
       setCommittee(updatedCommittee);
     });
 
-    // The cleanup function: This is crucial. It runs when the component unmounts.
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [committee]); // This effect runs only when the 'committee' object is first loaded
+    return () => newSocket.disconnect();
+  }, [committee]);
 
-
-  // --- (UPDATED) handlePlaceBid now uses the socket from state ---
   const handlePlaceBid = () => {
     const currentHighestBid = committee.currentBid;
     const newBidAmount = parseInt(bidAmount, 10);
@@ -66,10 +52,7 @@ function CommitteePage() {
     const bidderName = prompt("Please confirm your name to place a bid:");
     if (!bidderName) return;
 
-    // --- Critical Change ---
-    // Check if the socket connection exists in our state before trying to use it.
     if (socket) {
-      // Use the ONE existing socket to EMIT the event.
       socket.emit('new_bid', {
         committeeId: committee.id,
         name: bidderName,
@@ -78,10 +61,8 @@ function CommitteePage() {
     } else {
       console.error("Socket not connected. Cannot place bid.");
     }
-    
     setBidAmount('');
   };
-
 
   if (isLoading) return <div className="page-container"><h2>Loading...</h2></div>;
   if (!committee) return <div className="page-container"><h2>Committee Not Found</h2><p>The link may be incorrect.</p></div>;
