@@ -10,11 +10,13 @@ function HomePage() {
       alert('Please enter a name for the committee.');
       return;
     }
-    fetch('http://localhost:5001/api/committees', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: committeeName }),
-    })
+    // fetch('http://localhost:5001/api/committees', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ name: committeeName }),
+    // })
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+fetch(`${apiUrl}/api/committees`, { ... })
     .then(response => {
       if (!response.ok) {
         return response.json().then(err => { throw new Error(err.message) });
