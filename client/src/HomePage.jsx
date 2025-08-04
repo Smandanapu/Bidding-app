@@ -10,13 +10,16 @@ function HomePage() {
       alert('Please enter a name for the committee.');
       return;
     }
-    // fetch('http://localhost:5001/api/committees', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ name: committeeName }),
-    // })
+
+    // --- This is the corrected block ---
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-fetch(`${apiUrl}/api/committees`, { ... })
+    fetch(`${apiUrl}/api/committees`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: committeeName }),
+    })
     .then(response => {
       if (!response.ok) {
         return response.json().then(err => { throw new Error(err.message) });
@@ -39,12 +42,9 @@ fetch(`${apiUrl}/api/committees`, { ... })
     });
   };
 
-  // The component returns a single div with a dedicated class.
-  // This is the block that will be centered on the page.
   return (
     <div className="page-container">
       <h1>Jai Ganesha Maha prasadam Laddu Bidding</h1>
-      
       {!newCommitteeSlug ? (
         <div className="form-container">
           <input
