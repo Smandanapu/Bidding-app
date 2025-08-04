@@ -10,8 +10,6 @@ function HomePage() {
       alert('Please enter a name for the committee.');
       return;
     }
-
-    // --- This is the corrected block ---
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
     fetch(`${apiUrl}/api/committees`, {
       method: 'POST',
@@ -45,6 +43,7 @@ function HomePage() {
   return (
     <div className="page-container">
       <h1>Jai Ganesha Maha prasadam Laddu Bidding</h1>
+      
       {!newCommitteeSlug ? (
         <div className="form-container">
           <input
@@ -55,7 +54,7 @@ function HomePage() {
             placeholder="Enter your Ganesh Committee name"
           />
           <button onClick={handleCreateCommittee} className="create-button">
-            Create Bidding Link
+            Create your committee custom Bidding Link
           </button>
         </div>
       ) : (
