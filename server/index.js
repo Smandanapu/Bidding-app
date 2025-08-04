@@ -6,85 +6,71 @@ const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const httpServer = createServer(app);
+
+// --- (CRITICAL CHANGE) Define all allowed origins ---
+const allowedOrigins = [
+  "http://localhost:5173",                 // For local development
+  "https://laddu-bidding-app.netlify.app"    // Your live frontend URL
+];
+
+// --- (CRITICAL CHANGE) Create CORS options object ---
+const corsOptions = {
+  origin: allowedOrigins
+};
+
+// --- (UPDATED) Initialize Socket.IO with the new CORS options ---
 const io = new Server(httpServer, {
-  cors: { origin: "http://localhost:5173" }
+  cors: corsOptions
 });
 
 const PORT = 5001;
-
-// --- In-Memory "Database" ---
-const committees = {}; // Stores committee data by ID
-// (NEW) A lookup table to find a committee's ID from its slug
+const committees = {};
 const slugToIdMap = {};
 
-app.use(cors());
+// --- (UPDATED) Use the new CORS options in Express ---
+app.use(cors(corsOptions));
 app.use(express.json());
 
-
-// --- (NEW) Helper function to create a URL-friendly slug ---
+// Helper function to create a URL-friendly slug
 const slugify = (str) => {
   return str
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '') // Remove non-word chars
-    .replace(/[\s_-]+/g, '-') // Replace spaces with a single hyphen
-    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 };
 
-
-// --- (UPDATED) POST to create a new committee ---
+// POST to create a new committee
 app.post('/api/committees', (req, res) => {
-  const { name } = req.body; // Get the name from the request
+  const { name } = req.body;
   if (!name || name.trim() === '') {
     return res.status(400).json({ message: 'Committee name is required.' });
   }
-
   const id = uuidv4();
   const slug = slugify(name);
-
-  // Check if the slug already exists to prevent duplicate URLs
   if (slugToIdMap[slug]) {
-    return res.status(409).json({ message: 'A committee with this name already exists. Please choose a different name.' });
+    return res.status(409).json({ message: 'A committee with this name already exists.' });
   }
-
   const newCommittee = {
-    id: id,
-    name: name, // Store the original name
-    slug: slug, // Store the URL-friendly slug
-    currentBid: 0,
-    highestBidder: 'None',
-    bidHistory: [],
-    createdAt: new Date(),
+    id, name, slug, currentBid: 0, highestBidder: 'None', bidHistory: [], createdAt: new Date(),
   };
-  
   committees[id] = newCommittee;
-  slugToIdMap[slug] = id; // Add to our lookup table
-
+  slugToIdMap[slug] = id;
   console.log('New committee created:', newCommittee);
-  // Return the new slug so the frontend can build the link
   res.status(201).json({ slug: slug });
 });
 
-
-// --- (NEW) GET a specific committee's details by its SLUG ---
+// GET a specific committee's details by its SLUG
 app.get('/api/committees/slug/:slug', (req, res) => {
-    const { slug } = req.params;
-    const committeeId = slugToIdMap[slug];
-    const committee = committees[committeeId];
-
-    if (committee) {
-        res.status(200).json(committee);
-    } else {
-        res.status(404).json({ message: 'Committee not found' });
-    }
+  const { slug } = req.params;
+  const committeeId = slugToIdMap[slug];
+  const committee = committees[committeeId];
+  if (committee) res.status(200).json(committee);
+  else res.status(404).json({ message: 'Committee not found' });
 });
 
-
-// (We've removed the old /api/committees/:committeeId endpoint as it's replaced by the slug version)
-// (We've also removed the participant registration endpoints for simplicity as per your last request)
-
-
-// Socket.IO logic remains the same, as it correctly uses the unique ID
+// Socket.IO logic remains the same
 io.on('connection', (socket) => {
   socket.on('join_committee', (committeeId) => {
     socket.join(committeeId);
@@ -102,7 +88,6 @@ io.on('connection', (socket) => {
   });
   socket.on('disconnect', () => console.log(`User ${socket.id} disconnected`));
 });
-
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
